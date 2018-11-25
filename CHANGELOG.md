@@ -1,4 +1,9 @@
 # Changelog
+## v0.1.1
+
+Changes made in this version: 
+* * e0da41b - Bump version: 0.1.0 → 0.1.1
+* * 7449459 - Исправление Makefile для заливки на PyPI
 ## v0.1.0 
  Changes made in this version: 
 * * e70bfb6 - Bump version: 0.0.1 → 0.1.0

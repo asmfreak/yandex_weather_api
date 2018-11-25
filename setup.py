@@ -28,7 +28,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name='yandex_weather_api',
-    version="0.1.0",
+    version="0.1.1",
     url='https://github.com/ASMfreaK/yandex_weather_api',
     license='GPLv3',
     author='Pavel Pletenev',

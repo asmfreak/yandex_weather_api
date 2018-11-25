@@ -38,18 +38,28 @@ class Language(Enum):
         "en_US"   # международный английский
     )
 
+def stringify(filter):
+    return lambda x: str(filter(x))
+
+def lowcase_str_boolean(obj):
+    if isinstance(obj, str):
+        if obj not in ["true", "false"]:
+            raise RuntimeError(
+                'Expecting "true" or "false", got {}'.format(obj))
+        return obj
+    return str(bool(obj)).lower()
 
 ARGS_SCHEMA = vol.Schema({
-    vol.Required("lat"): number,       # широта
-    vol.Required("lon"): number,       # долгота
-    vol.Optional("lang"): Language.validate  # язык ответа
+    vol.Required("lat"): stringify(number),       # широта
+    vol.Required("lon"): stringify(number),       # долгота
+    vol.Optional("lang"): stringify(Language.validate)  # язык ответа
 })
 
 
 ARGS_FORECAST_SCHEMA = ARGS_SCHEMA.extend({
-    vol.Optional("limit"): integer,  # срок прогноза
-    vol.Optional("hours"): boolean,  # наличие почасового прогноза
-    vol.Optional("extra"): boolean   # подробный прогноз осадков
+    vol.Optional("limit"): stringify(integer),  # срок прогноза
+    vol.Optional("hours"): lowcase_str_boolean,  # наличие почасового прогноза
+    vol.Optional("extra"): lowcase_str_boolean   # подробный прогноз осадков
 })
 
 

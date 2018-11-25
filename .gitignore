@@ -17,3 +17,4 @@ pydocmd.yml
 .hypothesis
 .py34
 .eggs
+.tmp.*

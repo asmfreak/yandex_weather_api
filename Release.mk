@@ -1,9 +1,10 @@
 RELEASE_TYPE?=patch
+where-am-i = $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 release:
-	make bump
-	make tag
-	make push
-	make pypi
+	$(MAKE) -f $(call where-am-i) bump
+	$(MAKE) -f $(call where-am-i) tag
+	$(MAKE) -f $(call where-am-i) push
+	$(MAKE) -f $(call where-am-i) pypi
 
 bump:
 	bumpversion $(RELEASE_TYPE)

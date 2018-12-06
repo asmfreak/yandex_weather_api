@@ -1,9 +1,10 @@
 language: python
 python:
-  - "3.5"
   - "3.6"
+#  - "3.7"
 install:
   - pip install pipenv
+  - rm Pipfile.lock
   - pipenv install --dev --python $TRAVIS_PYTHON_VERSION
 script:
   - pipenv run make test lint

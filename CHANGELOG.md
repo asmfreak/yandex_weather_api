@@ -1,4 +1,10 @@
 # Changelog
+## v0.2.0
+
+Changes made in this version: 
+* * 6cce968 - Bump version: 0.1.1 → 0.2.0
+* * 78651bc - Исправлена работа CI
+* * 0e90043 - Исправлена работа тарифа для сайтов, добавлен CI
 ## v0.1.1
 
 Changes made in this version: 

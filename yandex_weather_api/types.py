@@ -15,30 +15,46 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from box import Box
+from typing import Tuple
+
 import voluptuous as vol
+from box import Box
 
-def number(n):
-    return float(n)
 
-def integer(n):
-    return int(n)
+def number(num):
+    "Валидатор для объектов, приводимых к float"
+    return float(num)
 
-def boolean(n):
-    return bool(n)
+
+def integer(num):
+    "Валидатор для объектов, приводимых к int"
+    return int(num)
+
+
+def boolean(num):
+    "Валидатор для объектов, приводимых к булеву типу"
+    return bool(num)
+
 
 class Enum(str):
+    "Тип-перечисление с валидатором"
+    VALUES = ()  # type: Tuple[str, ...]
+
     @classmethod
     def validate(cls, cnd):
+        "Проверяет, что переданный объект - один из возможных `VALUES`"
         if cnd not in cls.VALUES:
             raise ValueError("Value {} cannot be used in {}".format(
                 cnd, cls
             ))
         return cls(cnd)
+
     def __repr__(self):
         return "{}({})".format(self.__class__.__name__, super().__repr__())
 
+
 class Condition(Enum):
+    "Текущее состояние погоды"
     VALUES = (
         "clear",  # ясно
         "partly-cloudy",  # малооблачно
@@ -60,7 +76,9 @@ class Condition(Enum):
         "cloudy-and-snow",  # снег
     )
 
+
 class WindDir(Enum):
+    "Направление ветра"
     VALUES = (
         "nw",  # северо-западное
         "n",  # северное
@@ -70,10 +88,12 @@ class WindDir(Enum):
         "s",  # южное
         "sw",  # юго-западное
         "w",  # западное
-        "c"   # штиль FIXME: возможно неправильное значение (русская c)
+        "c"   # штиль
     )
 
+
 class Season(Enum):
+    "Время года"
     VALUES = (
         "summer",  # лето
         "autumn",  # осень
@@ -81,11 +101,14 @@ class Season(Enum):
         "spring"   # весна
     )
 
+
 class Daytime(Enum):
+    "Время суток"
     VALUES = (
         "d",  # светлое время суток
         "n",  # темное время суток
     )
+
 
 class Icon(str):
     """
@@ -96,15 +119,24 @@ class Icon(str):
     URL_FORMAT = "https://yastatic.net/weather/i/icons/blueye/color/svg/{}.svg"
     @classmethod
     def validate(cls, cnd):
+        "Проверяет правильность данного объекта"
         return cls(cnd)
 
     def as_url(self):
+        "Выдаёт ссылку на значок погоды"
         return self.URL_FORMAT.format(self)
 
+
 class BoxWithSchema(Box):
+    """
+    Коробка, которая может проверить валидность входных данных
+    на соответсвие схеме SCHEMA, которую должны предоставить потомки
+    """
     @classmethod
     def validate(cls, obj):
+        "Проверяет схему SCHEMA на объекте obj и создаёт коробку"
         return cls(cls.SCHEMA(obj))
+
 
 class TZInfo(BoxWithSchema):
     "Информация о часовом поясе. Содержит поля offset, name, abbr и dst."
@@ -118,6 +150,7 @@ class TZInfo(BoxWithSchema):
         # Признак летнего времени. 	Логический
         vol.Optional("dst"): bool
     })
+
 
 class Info(BoxWithSchema):
     """
@@ -145,6 +178,7 @@ class Info(BoxWithSchema):
 
     }, extra=vol.ALLOW_EXTRA)
 
+
 class FacticalWeatherInfo(BoxWithSchema):
     """
     Объект fact
@@ -160,7 +194,9 @@ class FacticalWeatherInfo(BoxWithSchema):
         # Параметр возвращается для населенных пунктов,
         # где данная информация актуальна. 	Число
         vol.Optional("temp_water"): number,
-        # Код иконки погоды. Иконка доступна по адресу https://yastatic.net/weather/i/icons/blueye/color/svg/<значение из поля icon>.svg. 	Строка
+        # Код иконки погоды. Иконка доступна по адресу
+        # https://yastatic.net/weather/i/icons/blueye/color/svg/
+        # <значение из поля icon>.svg. 	Строка
         vol.Required("icon"): Icon.validate,
         # Код расшифровки погодного описания. Возможные значения:
         vol.Required("condition"): Condition.validate,
@@ -206,6 +242,7 @@ class FacticalWeatherInfo(BoxWithSchema):
         vol.Optional("cloudness"): number,
     }, extra=vol.ALLOW_EXTRA)
 
+
 class MoonText(Enum):
     "Код фазы Луны. Возможные значения:"
     VALUES = (
@@ -217,11 +254,16 @@ class MoonText(Enum):
         "first-quarter",  # первая четверть
     )
 
+
 class PartName(Enum):
     "Название времени суток. Возможные значения:"
     VALUES = (
-
+        "night",  # ночь
+        "morning",  # утро
+        "day",  # день
+        "evening",  # вечер
     )
+
 
 class ForecastPart(BoxWithSchema):
     """
@@ -231,7 +273,7 @@ class ForecastPart(BoxWithSchema):
     """
     SCHEMA = vol.Schema({
         # Название времени суток. Возможные значения: 	Строка
-        #vol.Required("part_name"): PartName.validate,
+        vol.Optional("part_name"): PartName.validate,
         # Минимальная температура для времени суток (°C). 	Число
         vol.Required("temp_min"): number,
         # Максимальная температура для времени суток (°C). 	Число
@@ -270,46 +312,73 @@ class ForecastPart(BoxWithSchema):
         vol.Required("prec_prob"): number,
     }, extra=vol.ALLOW_EXTRA)
 
+
+BASE_FORECAST_SCHEMA = vol.Schema({
+    # Дата прогноза в формате ГГГГ-ММ-ДД. 	Строка
+    vol.Required("date"): str,
+    # Дата прогноза в формате Unixtime. 	Число
+    vol.Required("date_ts"): number,
+    # Порядковый номер недели. 	Число
+    vol.Required("week"): int,
+    # Время восхода Солнца, локальное время (может отсутствовать
+    # для полярных регионов). Строка
+    vol.Required("sunrise"): str,
+    # Время заката Солнца, локальное время (может отсутствовать
+    # для полярных регионов). 	Строка
+    vol.Required("sunset"): str,
+    # Код фазы Луны. Возможные значения: 	Число
+    # 0 — полнолуние.
+    # 1-3 — убывающая Луна.
+    # 4 — последняя четверть.
+    # 5-7 — убывающая Луна.
+    # 8 — новолуние.
+    # 9-11 — растущая Луна.
+    # 12 — первая четверть.
+    # 13-15 — растущая Луна.
+    vol.Required("moon_code"): int,
+    # Текстовый код для фазы Луны. Возможные значения: 	Строка
+    vol.Required("moon_text"): MoonText.validate,
+}, extra=vol.ALLOW_EXTRA)
+
+
 class Forecast(BoxWithSchema):
     """
     Объект forecast
 
-    Объект содержит данные прогноза погоды.
+    Объект содержит данные прогноза погоды при использовании тарифа
+    "Для сайтов". Переформирует данные в соответсвии с тарифом "Тестовый"
     """
-    SCHEMA = vol.Schema({
-        # Дата прогноза в формате ГГГГ-ММ-ДД. 	Строка
-        vol.Required("date"): str,
-        # Дата прогноза в формате Unixtime. 	Число
-        vol.Required("date_ts"): number,
-        # Порядковый номер недели. 	Число
-        vol.Required("week"): int,
-        # Время восхода Солнца, локальное время (может отсутствовать
-        # для полярных регионов). Строка
-        vol.Required("sunrise"): str,
-        # Время заката Солнца, локальное время (может отсутствовать для полярных регионов). 	Строка
-        vol.Required("sunset"): str,
-        # Код фазы Луны. Возможные значения: 	Число
-        # 0 — полнолуние.
-        # 1-3 — убывающая Луна.
-        # 4 — последняя четверть.
-        # 5-7 — убывающая Луна.
-        # 8 — новолуние.
-        # 9-11 — растущая Луна.
-        # 12 — первая четверть.
-        # 13-15 — растущая Луна.
-        vol.Required("moon_code"): int,
-        # Текстовый код для фазы Луны. Возможные значения: 	Строка
-        vol.Required("moon_text"): MoonText.validate,
+
+    SCHEMA = BASE_FORECAST_SCHEMA.extend({
+        # Прогнозы по времени суток. Содержит следующие поля: 	Объект
+        vol.Required("parts"): [
+            ForecastPart.validate
+        ]
+    })
+
+    @classmethod
+    def validate(cls, obj):
+        ret = super().validate(obj)
+        parts = {}
+        for part in ret.parts:
+            parts[part.part_name] = part
+        ret.parts = Box(parts)
+        return ret
+
+
+class Forecasts(BoxWithSchema):
+    """
+    Объект forecast
+
+    Объект содержит данные прогноза погоды для тарифа "Тестовый"
+    """
+    SCHEMA = BASE_FORECAST_SCHEMA.extend({
         # Прогнозы по времени суток. Содержит следующие поля: 	Объект
         vol.Required("parts"): {
-            vol.Required(key): ForecastPart.validate for key in [
-                "night",  # ночь
-                "morning",  # утро
-                "day",  # день
-                "evening",  # вечер
-            ]
+            vol.Required(key): ForecastPart.validate for key in PartName.VALUES
         },
-    }, extra=vol.ALLOW_EXTRA)
+    })
+
 
 class WeatherAnswer(BoxWithSchema):
     """
@@ -328,8 +397,8 @@ class WeatherAnswer(BoxWithSchema):
         # Объект фактической информации о погоде. Объект
         vol.Required("fact"): FacticalWeatherInfo.validate,
         # Объект прогнозной информации о погоде. Объект
-        vol.Exclusive("forecast", "forecast"): [ Forecast.validate],
-        vol.Exclusive("forecasts", "forecast"): [ Forecast.validate]
+        vol.Exclusive("forecast", "forecast"): [Forecast.validate],
+        vol.Exclusive("forecasts", "forecast"): [Forecasts.validate]
     }, extra=vol.ALLOW_EXTRA)
 
     @classmethod

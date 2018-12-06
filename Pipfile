@@ -4,12 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-aio-yandex-weather = {editable = true, path = "."}
+yandex_weather_api = {editable = true, path = "."}
 
 [dev-packages]
+pytest-cov = "*"
 requests = "*"
 aiohttp = "*"
 plumbum = "*"
+"flake8" = "*"
+pydocstyle = "*"
+pylint = "*"
+mypy = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6"

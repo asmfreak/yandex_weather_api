@@ -1,30 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    yandex_weather_api - Yandex Weather API python module
+yandex_weather_api - Yandex Weather API python module.
 
-    Copyright 2018 Pavel Pletenev <cpp.create@gmail.com>
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Copyright 2018 Pavel Pletenev <cpp.create@gmail.com>
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from setuptools import setup
-import os
-import re
-
-root = os.path.abspath(os.path.dirname(__file__))
 
 with open("README.md", "r") as readme_file:
-    long_description = readme_file.read()
+    LONG_DESCRIPTION = readme_file.read()
 
 setup(
     name='yandex_weather_api',
@@ -36,7 +32,7 @@ setup(
     install_requires=["voluptuous", "python-box", "aiohttp"],
     author_email='cpp.create@gmail.com',
     description='Yandex Weather API python module',
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     py_modules=['aio_yandex_weather'],
     include_package_data=True,
     platforms='any',

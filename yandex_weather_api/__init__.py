@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import voluptuous as vol
-from .types import Enum, number, boolean, integer
+from .types import Enum, number, boolean, integer, WeatherAnswer
 
 
 class Rate(Enum):
@@ -28,6 +28,7 @@ class Rate(Enum):
 
 
 class Language(Enum):
+    "Язык ответа"
     VALUES = (
         "ru_RU",  # русский язык для домена России
         "ru_UA",  # русский язык для домена Украины
@@ -38,16 +39,21 @@ class Language(Enum):
         "en_US"   # международный английский
     )
 
-def stringify(filter):
-    return lambda x: str(filter(x))
+
+def stringify(schema):
+    "Проверяет схему и преобразует полученное значение в строку"
+    return lambda x: str(schema(x))
+
 
 def lowcase_str_boolean(obj):
+    "Делает из obj строку `true` или `false`"
     if isinstance(obj, str):
         if obj not in ["true", "false"]:
             raise RuntimeError(
                 'Expecting "true" or "false", got {}'.format(obj))
         return obj
     return str(bool(obj)).lower()
+
 
 ARGS_SCHEMA = vol.Schema({
     vol.Required("lat"): stringify(number),       # широта
@@ -64,23 +70,47 @@ ARGS_FORECAST_SCHEMA = ARGS_SCHEMA.extend({
 
 
 def validate_args(api_key, *, rate="informers", **kwargs):
+    "Проверяет и формирует аргументы для запроса"
     rate = Rate.validate(rate)
     headers = {"X-Yandex-API-Key": api_key}
     url = "https://api.weather.yandex.ru/v1/{}".format(rate)
     if rate == "informers":
-        params =  ARGS_SCHEMA(kwargs)
+        params = ARGS_SCHEMA(kwargs)
     else:
-        params =  ARGS_FORECAST_SCHEMA(kwargs)
+        params = ARGS_FORECAST_SCHEMA(kwargs)
     return (url,), {"headers": headers, "params": params}
 
 
 def get(session, api_key, **kwargs):
+    """
+    Выполняет доступ к API.
+
+    session - модуль requests или сессия из него
+    api_key - строка ключа доступа к API
+    rate - тариф, может быть `informers` или `forecast`
+    lat, lon - широта и долгота
+
+    ```
+    import yandex_weather_api
+    import requests as req
+
+    yandex_weather_api.get(req, "ЗАМЕНИ_МЕНЯ_КЛЮЧОМ", lat=55.10, lon=60.10)
+    ```
+    """
     args, kwargs = validate_args(api_key, **kwargs)
     resp = session.get(*args, **kwargs)
-    return types.WeatherAnswer.validate(resp.json())
+    return WeatherAnswer.validate(resp.json())
 
 
 async def async_get(session, api_key, **kwargs):
+    """
+    Выполняет асинхронный доступ к API.
+
+    session - экземпляр объекта ClientSession из aiohttp
+    api_key - строка ключа доступа к API
+    rate - тариф, может быть `informers` или `forecast`
+    lat, lon - широта и долгота
+    """
     args, kwargs = validate_args(api_key, **kwargs)
     resp = await session.get(*args, **kwargs)
-    return types.WeatherAnswer.validate(await resp.json())
+    return WeatherAnswer.validate(await resp.json())

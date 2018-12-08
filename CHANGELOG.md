@@ -1,4 +1,9 @@
 # Changelog
+## v0.2.1
+
+Changes made in this version: 
+* * 180751e - Bump version: 0.2.0 → 0.2.1
+* * 74c2840 - Fix package name
 ## v0.2.0
 
 Changes made in this version: 

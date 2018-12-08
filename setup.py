@@ -33,7 +33,7 @@ setup(
     author_email='cpp.create@gmail.com',
     description='Yandex Weather API python module',
     long_description=LONG_DESCRIPTION,
-    py_modules=['aio_yandex_weather'],
+    py_modules=['yandex_weather_api'],
     include_package_data=True,
     platforms='any',
     classifiers=[

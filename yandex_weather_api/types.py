@@ -22,8 +22,7 @@ from box import Box
 
 
 # typing typevar
-T = TypeVar('T')
-
+T = TypeVar('T')  # pylint: disable=invalid-name
 
 
 def ensure_list(value: Union[T, Sequence[T]]) -> Sequence[T]:

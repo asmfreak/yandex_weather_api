@@ -15,10 +15,27 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from typing import Tuple
+from typing import Tuple, Union, Sequence, TypeVar
 
 import voluptuous as vol
 from box import Box
+
+
+# typing typevar
+T = TypeVar('T')
+
+
+
+def ensure_list(value: Union[T, Sequence[T]]) -> Sequence[T]:
+    """Wrap value in list if it is not one."""
+    if value is None:
+        return []
+    return value if isinstance(value, list) else [value]
+
+
+def ensure_list_of(validator):
+    """Wrap value if it is not one, and run validator in each item."""
+    return lambda value: list(validator(y) for y in ensure_list(value))
 
 
 def number(num):
@@ -351,9 +368,7 @@ class Forecast(BoxWithSchema):
 
     SCHEMA = BASE_FORECAST_SCHEMA.extend({
         # Прогнозы по времени суток. Содержит следующие поля: 	Объект
-        vol.Required("parts"): [
-            ForecastPart.validate
-        ]
+        vol.Required("parts"): [ForecastPart.validate]
     })
 
     @classmethod
@@ -391,13 +406,14 @@ class WeatherAnswer(BoxWithSchema):
         # Время сервера в формате Unixtime. Числ
         vol.Required("now"): number,
         # Время сервера в UTC. Строка
-        vol.Required("now_dt"): str,
+        vol.Optional("now_dt"): str,
         # Объект информации о населенном пункте. Объект
         vol.Required("info"): Info.validate,
         # Объект фактической информации о погоде. Объект
         vol.Required("fact"): FacticalWeatherInfo.validate,
         # Объект прогнозной информации о погоде. Объект
-        vol.Exclusive("forecast", "forecast"): [Forecast.validate],
+        vol.Exclusive("forecast", "forecast"):
+            ensure_list_of(Forecast.validate),
         vol.Exclusive("forecasts", "forecast"): [Forecasts.validate]
     }, extra=vol.ALLOW_EXTRA)
 

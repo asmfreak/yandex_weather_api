@@ -18,7 +18,7 @@
 # pylint: disable=no-name-in-module,arguments-differ
 import os
 from textwrap import dedent
-
+from pprint import pprint
 import requests
 import plumbum.cli
 from plumbum.colors import green
@@ -48,7 +48,8 @@ class WeatherCli(plumbum.cli.Application):
         # pylint: disable=invalid-name
         api_key = os.environ.get("YANDEX_API_KEY")
         rate = os.environ.get("YANDEX_WEATHER_RATE", "informers")
-        w = get(requests, api_key, rate=rate, lat=lat, lon=lon)
+        w = get(requests, api_key, rate=rate, lat=lat, lon=lon, limit=2)
+        pprint(w)
         temp = green | (str(w.fact.temp) + '°C')
         print(dedent(f"""
         Температура { temp } (ощущается как {w.fact.feels_like}°C)

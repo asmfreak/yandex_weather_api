@@ -1,4 +1,9 @@
 # Changelog
+## v0.2.4
+
+Changes made in this version: 
+* * 862c667 - Bump version: 0.2.3 → 0.2.4
+* * 85b5b87 - Fix lint warnings
 ## v0.2.3
 
 Changes made in this version: 

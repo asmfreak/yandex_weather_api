@@ -1,4 +1,9 @@
 # Changelog
+## v0.2.3
+
+Changes made in this version: 
+* * bbf8be3 - Bump version: 0.2.2 → 0.2.3
+* * e967598 - Fix format for informers answer
 ## v0.2.2
 
 Changes made in this version: 

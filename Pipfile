@@ -8,7 +8,7 @@ yandex_weather_api = {editable = true, path = "."}
 
 [dev-packages]
 requests = "==2.20.1"
-aiohttp = "==3.4.4"
+aiohttp = "==3.8.1"
 plumbum = "==1.6.7"
 "flake8" = "==3.6.0"
 pydocstyle = "==3.0.0"
